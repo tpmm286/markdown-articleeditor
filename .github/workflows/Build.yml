@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true   # برای رفع اخطار Node 20
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   build-web:
@@ -76,9 +76,11 @@ jobs:
       - name: Install Capacitor & Prepare Android
         run: |
           bun add -d @capacitor/cli @capacitor/core @capacitor/android
-          bunx cap init "Markdown Article Editor" "com.markdown.articleeditor" --web-dir out
-          bunx cap add android
-          bunx cap sync android
+          # بررسی وجود پوشه out
+          if [ ! -d "out" ]; then echo "out folder missing!"; exit 1; fi
+          bun run cap init "Markdown Article Editor" "com.markdown.articleeditor" --web-dir out
+          bun run cap add android
+          bun run cap sync android
 
       - name: Build Android Debug APK
         run: |
@@ -103,31 +105,39 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 20
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: bun install
+        run: npm ci   # یا npm install اگر lock وجود ندارد
 
       - name: Build Next.js Static App
         env:
           NEXT_EXPORT: "true"
           GITHUB_ACTIONS: "true"
-        run: bun run build
+        run: npm run build
 
       - name: Setup Nativefier
         run: |
-          bun add -d nativefier
-          bunx nativefier --name "MarkdownArticleEditor" "out/index.html" --platform windows --arch x64 --out build-win --single-instance
+          npm install -g nativefier
+          nativefier --name "MarkdownArticleEditor" "out/index.html" --platform windows --arch x64 --out build-win --single-instance
+          # بررسی وجود خروجی
+          if (Test-Path build-win) { 
+            Write-Host "Nativefier build succeeded" 
+          } else { 
+            Write-Error "Nativefier output not found" 
+            exit 1 
+          }
 
       - name: Zip Windows App
         run: |
           if (Test-Path build-win) {
             Compress-Archive -Path build-win\* -DestinationPath markdown-article-editor-windows.zip
           } else {
-            Write-Error "build-win folder not found! Nativefier may have failed."
+            Write-Error "build-win folder missing"
             exit 1
           }
 
