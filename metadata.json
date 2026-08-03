@@ -1,0 +1,6 @@
+{
+  "name": "مبدل Markdown به مقاله HTML",
+  "description": "ابزار پیشرفته تبدیل کدهای Markdown به مقاله‌های استاندارد HTML با قالب‌های متنوع، پشتیبانی کامل از راست‌چین (RTL/LTR)، پیش‌نمایش زنده، خروجی فایل و پرینت.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
