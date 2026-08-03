@@ -105,23 +105,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: 'npm'
+          bun-version: latest
 
       - name: Install Dependencies
-        run: npm ci   # یا npm install اگر lock وجود ندارد
+        run: bun install   # استفاده از bun.lock
 
       - name: Build Next.js Static App
         env:
           NEXT_EXPORT: "true"
           GITHUB_ACTIONS: "true"
-        run: npm run build
+        run: bun run build
 
-      - name: Setup Nativefier
+      - name: Setup Nativefier (via npm)
         run: |
+          # Nativefier با npm نصب می‌شود (چون در ویندوز با Bun ممکن است مشکل داشته باشد)
           npm install -g nativefier
           nativefier --name "MarkdownArticleEditor" "out/index.html" --platform windows --arch x64 --out build-win --single-instance
           # بررسی وجود خروجی
