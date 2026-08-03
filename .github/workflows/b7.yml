@@ -1,0 +1,152 @@
+name: Build Windows 7 Portable EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows 7 Portable EXE
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Next.js Static App
+        env:
+          NEXT_EXPORT: "true"
+          GITHUB_ACTIONS: "true"
+        run: |
+          npm run build
+          npx next export
+
+      - name: Debug - Check out folder
+        run: |
+          if (Test-Path out) {
+            Write-Host "✅ out folder exists"
+            dir out
+            if (Test-Path out\index.html) {
+              Write-Host "✅ index.html exists"
+            } else {
+              Write-Error "❌ index.html not found!"
+              exit 1
+            }
+          } else {
+            Write-Error "❌ out folder not found!"
+            exit 1
+          }
+
+      - name: Setup Electron Portable Project
+        run: |
+          New-Item -ItemType Directory -Force -Path electron
+          cd electron
+          
+          # package.json برای حالت پرتابل
+          @"
+          {
+            "name": "markdown-editor-portable",
+            "version": "1.0.0",
+            "main": "main.js",
+            "scripts": {
+              "build": "electron-builder"
+            },
+            "devDependencies": {
+              "electron": "^9.4.4",
+              "electron-builder": "^22.14.13"
+            },
+            "build": {
+              "appId": "com.markdown.editor",
+              "productName": "Markdown Editor",
+              "directories": {
+                "output": "release"
+              },
+              "win": {
+                "target": "portable",
+                "icon": "icon.ico"
+              },
+              "portable": {
+                "artifactName": "MarkdownEditor-portable.exe"
+              }
+            }
+          }
+          "@ | Out-File -FilePath package.json -Encoding utf8
+
+          # main.js
+          @"
+          const { app, BrowserWindow } = require('electron');
+          const path = require('path');
+
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 1200,
+              height: 800,
+              webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true
+              },
+              icon: path.join(__dirname, 'icon.ico')
+            });
+
+            win.loadFile(path.join(__dirname, '../out/index.html'));
+          }
+
+          app.whenReady().then(() => {
+            createWindow();
+          });
+
+          app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') {
+              app.quit();
+            }
+          });
+          "@ | Out-File -FilePath main.js -Encoding utf8
+
+      - name: Create Icon Placeholder
+        run: |
+          cd electron
+          # یک فایل آیکون خالی ایجاد می‌کنیم
+          # اگر آیکون واقعی دارید، آن را در ریشه پروژه قرار دهید
+          @"
+          // برای آیکون واقعی، یک فایل icon.ico در پوشه electron قرار دهید
+          "@ | Out-File -FilePath icon.ico -Encoding utf8
+
+      - name: Install Electron Dependencies
+        run: |
+          cd electron
+          npm install
+
+      - name: Build Portable EXE
+        run: |
+          cd electron
+          npm run build
+
+      - name: Debug - Check build output
+        run: |
+          if (Test-Path electron\release) {
+            Write-Host "✅ Release folder exists"
+            dir electron\release
+          } else {
+            Write-Error "❌ Release folder not found!"
+            exit 1
+          }
+
+      - name: Upload Portable EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-editor-windows7-portable
+          path: electron/release/*.exe
