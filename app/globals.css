@@ -1,0 +1,397 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+/* Color Variables for Reading Modes */
+:root, [data-active-mode="day"] {
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: #e2e8f0;
+  --bg-accent: #f1f5f9;
+  --color-primary: #4f46e5;
+  --code-bg: #0f172a;
+  --code-text: #f8fafc;
+  --table-header-bg: #f1f5f9;
+  --table-row-alt: #f8fafc;
+  --blockquote-bg: #f1f5f9;
+  --blockquote-border: #6366f1;
+}
+
+[data-active-mode="night"] {
+  --bg-page: #090d16;
+  --bg-card: #131b2e;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #23314d;
+  --bg-accent: #1c273e;
+  --color-primary: #818cf8;
+  --code-bg: #0b0f19;
+  --code-text: #f8fafc;
+  --table-header-bg: #1c273e;
+  --table-row-alt: #162136;
+  --blockquote-bg: #1c273e;
+  --blockquote-border: #818cf8;
+}
+
+[data-active-mode="reading"] {
+  --bg-page: #f4ebd0;
+  --bg-card: #fbf5e5;
+  --text-main: #36291b;
+  --text-muted: #66523d;
+  --border-color: #e4d7bd;
+  --bg-accent: #efe3c7;
+  --color-primary: #b45309;
+  --code-bg: #2d2317;
+  --code-text: #fbf5e5;
+  --table-header-bg: #efe3c7;
+  --table-row-alt: #f7eed7;
+  --blockquote-bg: #efe3c7;
+  --blockquote-border: #d97706;
+}
+
+/* Print styling for direct Article PDF printing via browser */
+@media print {
+  :root, [data-active-mode] {
+    --bg-page: #ffffff !important;
+    --bg-card: #ffffff !important;
+    --text-main: #0f172a !important;
+    --text-muted: #334155 !important;
+    --border-color: #cbd5e1 !important;
+    --bg-accent: #f8fafc !important;
+    --color-primary: #3730a3 !important;
+    --code-bg: #f8fafc !important;
+    --code-text: #0f172a !important;
+    --table-header-bg: #f1f5f9 !important;
+    --table-row-alt: #ffffff !important;
+    --blockquote-bg: #f8fafc !important;
+    --blockquote-border: #4f46e5 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 1.8cm 1.5cm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print, header.no-print, nav.no-print, div.no-print, button, select, input {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .article-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    min-h-0: 0 !important;
+  }
+
+  .article-body h1, .article-body h2, .article-body h3, .article-body h4, .article-body h5, .article-body h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #0f172a !important;
+  }
+
+  .article-body p, .article-body blockquote, .article-body pre, .article-body table, .callout-box, .article-body img {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .article-body pre {
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    font-size: 9.5pt !important;
+  }
+
+  .article-body code:not(pre code) {
+    background: #f1f5f9 !important;
+    color: #3730a3 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .article-body table {
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .article-body th, .article-body td {
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  .callout-box {
+    border-width: 1px 4px 1px 1px !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+
+/* Custom code block styling inside articles */
+pre code {
+  font-family: 'JetBrains Mono', monospace !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Rich Article Body Styles using CSS Variables for multi-theme & night-mode support */
+.article-body h1, .article-body .heading-1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 1.75em;
+  margin-bottom: 0.6em;
+  line-height: 1.35;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.4rem;
+}
+
+.article-body h2, .article-body .heading-2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.35;
+}
+
+.article-body h3, .article-body .heading-3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-top: 1.25em;
+  margin-bottom: 0.4em;
+  line-height: 1.4;
+}
+
+.article-body h4, .article-body h5, .article-body h6,
+.article-body .heading-4, .article-body .heading-5, .article-body .heading-6 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+}
+
+.article-body p {
+  margin: 1em 0;
+  line-height: inherit;
+  text-align: justify;
+  color: var(--text-main);
+}
+
+.article-body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.article-body a:hover {
+  opacity: 0.8;
+}
+
+.article-body strong, .article-body b {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.article-body em, .article-body i {
+  font-style: italic;
+}
+
+.article-body del, .article-body s {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.article-body ul {
+  list-style-type: disc !important;
+  margin: 1em 0;
+  padding-right: 1.75rem;
+  padding-left: 0;
+  color: var(--text-main);
+}
+
+html[dir="ltr"] .article-body ul {
+  padding-right: 0;
+  padding-left: 1.75rem;
+}
+
+.article-body ol {
+  list-style-type: decimal !important;
+  margin: 1em 0;
+  padding-right: 1.75rem;
+  padding-left: 0;
+  color: var(--text-main);
+}
+
+html[dir="ltr"] .article-body ol {
+  padding-right: 0;
+  padding-left: 1.75rem;
+}
+
+.article-body li {
+  margin-bottom: 0.4em;
+  line-height: 1.7;
+  color: var(--text-main);
+}
+
+.article-body li input[type="checkbox"] {
+  margin: 0 0.5rem;
+  accent-color: var(--color-primary);
+}
+
+.article-body blockquote, .article-body .article-blockquote {
+  margin: 1.25em 0;
+  padding: 0.85rem 1.25rem;
+  border-right: 4px solid var(--blockquote-border);
+  background-color: var(--blockquote-bg);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+html[dir="ltr"] .article-body blockquote, html[dir="ltr"] .article-body .article-blockquote {
+  border-right: 0;
+  border-left: 4px solid var(--blockquote-border);
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.article-body code:not(pre code) {
+  background-color: var(--bg-accent);
+  color: var(--color-primary);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875em;
+  direction: ltr;
+  display: inline-block;
+}
+
+.article-body table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+}
+
+.article-body th {
+  background-color: var(--table-header-bg);
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-color);
+}
+
+.article-body td {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.article-body tr:nth-child(even) {
+  background-color: var(--table-row-alt);
+}
+
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.article-body hr {
+  border: 0;
+  border-top: 2px solid var(--border-color);
+  margin: 2rem 0;
+}
+
+/* Callout Boxes */
+.callout-box {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  direction: rtl;
+  border-right: 4px solid #3b82f6;
+}
+
+html[dir="ltr"] .callout-box {
+  direction: ltr;
+  border-right: none;
+  border-left: 4px solid #3b82f6;
+}
+
+.callout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.callout-content {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.callout-note { border-color: #3b82f6; background-color: #eff6ff; color: #1e3a8a; }
+.callout-warning { border-color: #f59e0b; background-color: #fffbeb; color: #78350f; }
+.callout-tip { border-color: #10b981; background-color: #ecfdf5; color: #064e3b; }
+.callout-important { border-color: #f43f5e; background-color: #fff1f2; color: #881337; }
+
+[data-active-mode="night"] .callout-note { border-color: #60a5fa; background-color: #1e293b; color: #bfdbfe; }
+[data-active-mode="night"] .callout-warning { border-color: #fbbf24; background-color: #2e2011; color: #fef08a; }
+[data-active-mode="night"] .callout-tip { border-color: #34d399; background-color: #062e24; color: #a7f3d0; }
+[data-active-mode="night"] .callout-important { border-color: #fb7185; background-color: #31131d; color: #fecdd3; }
+
+[data-active-mode="reading"] .callout-note { border-color: #3b82f6; background-color: #eaf1f8; color: #1e3a8a; }
+[data-active-mode="reading"] .callout-warning { border-color: #d97706; background-color: #f6ebd6; color: #78350f; }
+[data-active-mode="reading"] .callout-tip { border-color: #059669; background-color: #e5f2eb; color: #064e3b; }
+[data-active-mode="reading"] .callout-important { border-color: #e11d48; background-color: #f8e5e8; color: #881337; }
