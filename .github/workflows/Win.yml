@@ -1,0 +1,74 @@
+name: Build Windows EXE Only
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies with Bun
+        run: bun install
+
+      - name: Build Next.js Static App
+        env:
+          NEXT_EXPORT: "true"
+          GITHUB_ACTIONS: "true"
+        run: bun run build
+
+      - name: Debug - List out folder contents
+        run: |
+          if (Test-Path out) {
+            Write-Host "out folder exists:"
+            dir out
+          } else {
+            Write-Error "out folder not found!"
+            exit 1
+          }
+
+      - name: Install Nativefier with npm
+        run: npm install -g nativefier
+
+      - name: Build EXE with Nativefier
+        run: |
+          nativefier --name "MarkdownArticleEditor" "out/index.html" --platform windows --arch x64 --out build-win --single-instance --verbose
+          if (Test-Path build-win) {
+            Write-Host "Nativefier build succeeded"
+          } else {
+            Write-Error "Nativefier output not found"
+            exit 1
+          }
+
+      - name: Zip Windows App
+        run: |
+          if (Test-Path build-win) {
+            Compress-Archive -Path build-win\* -DestinationPath markdown-article-editor-windows.zip
+            Write-Host "Zip created successfully"
+          } else {
+            Write-Error "build-win folder missing"
+            exit 1
+          }
+
+      - name: Upload Windows EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-article-editor-windows-app
+          path: markdown-article-editor-windows.zip
