@@ -1,0 +1,138 @@
+name: Build Cross-Platform ( Web, Android APK, Windows EXE)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# برای رفع اخطار Node 20 (در صورت ادامه استفاده از Node 20)
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  build-web:
+    name: Build Web Package (HTML/JS)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20          # یا 24
+          cache: 'npm'
+          # حذف node-scale
+
+      - name: Install Dependencies
+        run: npm ci   # حالا که package-lock.json وجود دارد، کار می‌کند
+
+      - name: Build Export
+        env:
+          NEXT_EXPORT: "true"
+          GITHUB_ACTIONS: "true"
+        run: npm run build
+
+      - name: Zip Web Output
+        run: cd out && zip -r ../markdown-article-editor-web.zip .
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-article-editor-web
+          path: markdown-article-editor-web.zip
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci   # یا npm install اگر lock وجود ندارد
+
+      - name: Build Next.js Static App
+        env:
+          NEXT_EXPORT: "true"
+          GITHUB_ACTIONS: "true"
+        run: npm run build
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3   # <-- اضافه شد
+
+      - name: Install Capacitor & Prepare Android
+        run: |
+          npm install -g @capacitor/cli @capacitor/core @capacitor/android
+          npx cap init "Markdown Article Editor" "com.markdown.articleeditor" --web-dir out
+          npx cap add android
+          npx cap sync android
+
+      - name: Build Android Debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Copy Built APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk markdown-article-editor-android.apk
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-article-editor-android-apk
+          path: markdown-article-editor-android.apk
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js Static App
+        env:
+          NEXT_EXPORT: "true"
+          GITHUB_ACTIONS: "true"
+        run: npm run build
+
+      - name: Setup Nativefier
+        run: |
+          npm install -g nativefier
+          nativefier --name "MarkdownArticleEditor" "out/index.html" --platform windows --arch x64 --out build-win --single-instance
+
+      - name: Zip Windows App
+        run: |
+          Compress-Archive -Path build-win\* -DestinationPath markdown-article-editor-windows.zip
+
+      - name: Upload Windows EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markdown-article-editor-windows-app
+          path: markdown-article-editor-windows.zip
